@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+pydantic
+transformers  # >= v4.51.0
+torch
+accelerate
+hf_xet
+nltk
+tinydb
+pandas
+scikit-learn
+scipy
