@@ -37,7 +37,8 @@ class Features:
         try:
             values = self.nltk_sentiment(conversation_data)
             sentiment = self.llm_sentiment(conversation_data)
-            summary = self.llm_summarization(conversation_data)
+            summary = {'summary_text': conversation_data.message}
+            # summary = self.llm_summarization(conversation_data)
             output = {
                 'vader_scores': values,
                 'top_sentiment': sentiment,
@@ -61,7 +62,6 @@ class Features:
             return f"Error during LLM processing: {e}"
 
         output = output.pop()
-        print("** OUTPUT", output)
         return dict(output)
 
     def llm_sentiment(self, conversation_data: ConversationInput) -> dict | str:

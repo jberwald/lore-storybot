@@ -10,3 +10,4 @@ tinydb
 pandas
 scikit-learn
 scipy
+jupyterlab
