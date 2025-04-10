@@ -89,7 +89,8 @@ to arrive at a separate score:
 These scores come from a rule-based model known as VADER ("Valence Aware Dictionary and sEntiment Reasoner").
 
 Given a list of labels that we are interested in flagging in message, the app aligns the message text with 
-those labels using a named entity recognition model (NuNerZero). Here is an example of the `label -> entity` 
+those labels using a named entity recognition model (NuNerZero). The current list of labels can be found 
+[here](https://github.com/jberwald/lore-storybot/blob/main/storybot/features.py#L135-L138) Here is an example of the `label -> entity` 
 mapping:
 ```json
 "entities": {
