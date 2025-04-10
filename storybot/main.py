@@ -10,8 +10,6 @@ else:
     mps_device = torch.device("cpu") # Fallback to CPU if MPS is not available
 
 from models import ConversationInput, Response
-from features import Features
-
 from tinydb import TinyDB, Query
 
 from models import (
@@ -20,7 +18,7 @@ from models import (
     flatten_entry,
     UserId,
 )
-from features import MessageProcessor
+from features import MessageProcessor, NuNerZero, Features
 
 
 # Various models tested and considered.
@@ -31,6 +29,8 @@ model_id_summarizer = "meta-llama/Llama-3.2-3B"
 # model_id = "tabularisai/multilingual-sentiment-analysis"
 # model_id = "distilbert/distilbert-base-uncased-finetuned-sst-2-english"
 model_id_classifier = "j-hartmann/emotion-english-distilroberta-base"
+# model_id_classifier = "numind/NuNER_Zero"
+
 # model_id_summarizer = "mistralai/Mistral-7B-Instruct-v0.3"
 # tokenizer = "google-bert/bert-base-cased"
 
@@ -40,7 +40,7 @@ DATABASE_FILE = "./storybot.json"
 
 # Create the file if it doesn't exist)
 db = TinyDB(DATABASE_FILE)
-table = db.table('conversations')
+table = db.table('convos_entities')
 
 
 # Load the pre-trained model.
@@ -65,6 +65,8 @@ ftr = Features(
     summarizer=summarizer
 )
 
+ner = NuNerZero()
+
 
 @app.post("/extract_sentiment", response_model=Response)
 async def extract_sentiment(conversation_data: ConversationInput) -> dict:
@@ -72,7 +74,11 @@ async def extract_sentiment(conversation_data: ConversationInput) -> dict:
     Endpoint to extract sentiment from a request
     """
     try:
-        output = ftr.extract_features(conversation_data)
+        output = {}
+        sentiment = ftr.extract_features(conversation_data)
+        entities = ner.named_entities(conversation_data)
+        output.update(sentiment)
+        output.update(entities)
         output['metadata'] = conversation_data.metadata
         return {"response": output}
     except Exception as e:
