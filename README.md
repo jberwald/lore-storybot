@@ -133,11 +133,13 @@ as their only parameter in the payload. The latter calls the first, then perform
 user's messages, surfacing the most important words (statistically). Here is an example response:
 ```json
 {'response': 
-    {'able defend': 4.860729711040595,
+    {
+      'able defend': 4.860729711040595,
       'able help': 4.860729711040595,
       'able home': 4.860729711040595,
       'able make': 4.860729711040595,
-      'able offer': 4.860729711040595}
+      'able offer': 4.860729711040595
+    }
 }
 ```
 Note that the analysis uses unigrams and bigrams. 
