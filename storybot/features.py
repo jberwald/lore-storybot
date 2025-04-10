@@ -3,6 +3,7 @@ from typing import List
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 import scipy.sparse as sp
+from gliner import GLiNER
 from transformers import Pipeline
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -105,7 +106,7 @@ class MessageProcessor:
         self.tfidf_vectorizer.fit(self.messages)
         self.tfidf_matrix = self.tfidf_vectorizer.transform(self.messages)
 
-    def get_top_features(self, max_features: int = 5):
+    def get_top_features(self, max_features: int = 5) -> dict:
 
         # Tokens, minus those filtered
         feature_names = self.tfidf_vectorizer.get_feature_names_out()
@@ -121,8 +122,50 @@ class MessageProcessor:
         return {token: float(val) for token, val in top_tokens[:max_features]}
 
 
+@dataclass
+class NuNerZero:
 
+    model = GLiNER.from_pretrained("numind/NuNerZero")
 
+    # test
+    labels: List[str] = field(default_factory=list)
+
+    def __post_init__(self):
+        # TODO: make these accessible as input args
+        self.labels = ["belief", "emotion", "sentiment", "request",
+                       "medical", "sickness", "ailment", "knees", "hands",
+                       "head", "annoyed", "frustrated", "pain", "spouse",
+                       "family", "harm"]
+
+    def merge_entities(self, text: str, entities: list) -> list:
+        if not entities:
+            return []
+        merged = []
+        current = entities[0]
+        for next_entity in entities[1:]:
+            if next_entity['label'] == current['label'] and (
+                    next_entity['start'] == current['end'] + 1 or next_entity['start'] == current['end']):
+                current['text'] = text[current['start']: next_entity['end']].strip()
+                current['end'] = next_entity['end']
+            else:
+                merged.append(current)
+                current = next_entity
+        # Append the last entity
+        merged.append(current)
+        return merged
+
+    def named_entities(self, conversation: ConversationInput) -> dict:
+        predicted_entitites = self.model.predict_entities(conversation.message, self.labels)
+
+        print("PREDICTED: ", predicted_entitites)
+
+        entities = {}
+        for entity in self.merge_entities(conversation.message, predicted_entitites):
+            entities[entity['label']] = entity['text']
+
+        print("MERGED: ", predicted_entitites)
+
+        return {"entities": entities}
 
 
 

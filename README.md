@@ -86,7 +86,21 @@ to arrive at a separate score:
       "compound": 0.296
 }
 ```
-These scores come from a rule-based model known as VADER ("Valence Aware Dictionary and sEntiment Reasoner"). 
+These scores come from a rule-based model known as VADER ("Valence Aware Dictionary and sEntiment Reasoner").
+
+Given a list of labels that we are interested in flagging in message, the app aligns the message text with 
+those labels using a named entity recognition model (NuNerZero). Here is an example of the `label -> entity` 
+mapping:
+```json
+"entities": {
+  "emotion": "down",
+  "medical": "health",
+  "family": "family"
+}
+```
+(Note: NuNerZero is not available through Huggingface pipelines, so the model must be downloaded by hand to run
+the code. In the `storybot` directory, create `numind/NuNerZero` and place the `model.safetensors` and 
+`gliner_config.json` in there. Both can be downloaded from [here](https://huggingface.co/numind/NuNER_Zero/tree/main).)
 
 Lastly, the feature extraction step attempted to summarize the messages. This step was fairly ineffective, so was commented out
 in the final version. The complete response from the API looks like this:
@@ -94,23 +108,28 @@ in the final version. The complete response from the API looks like this:
 {
   "response": {
     "vader_scores": {
-      "neg": 0.241,
-      "neu": 0.592,
-      "pos": 0.166,
-      "compound": -0.5646
+      "neg": 0.12,
+      "neu": 0.813,
+      "pos": 0.068,
+      "compound": -0.3274
     },
     "top_sentiment": {
-      "label": "fear",
-      "score": 0.48230403661727905
+      "label": "sadness",
+      "score": 0.594653844833374
     },
     "summary": {
-      "summary_text": "I\u2019d appreciate that. My grandson usually helps, but he\u2019s busy with school lately. I feel so helpless."
+      "summary_text": "I managed to get to the stories! But I\u2019m feeling a bit down today. My health has been off, and I\u2019m worried about my family."
+    },
+    "entities": {
+      "emotion": "down",
+      "medical": "health",
+      "family": "family"
     },
     "metadata": {
       "user_id": 782,
       "conversation_id": 98696,
       "screen_name": "ChattyPenguin",
-      "timestamp": "2023-10-01T10:35:00Z"
+      "timestamp": "2023-10-02T11:15:00Z"
     }
   }
 }
